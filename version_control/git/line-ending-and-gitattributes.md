@@ -40,7 +40,9 @@ The modern way is not specifying `core.autocrlf` (or using it as a default), and
 
 In addition, separate files can override `core.eol` with `eol` attribute. For example `*.tm eol=crlf` can set all timing files in CORTEX to have CRLF endings no matter what.
 
-I recommend at least having a `.gitattributes` with `* text=auto` as the only line. This makes line ending conversion mandatory, regardless what `core.autocrlf` there is. Even better, we can add some more specific rules above this "baseline".
+I recommend at least having a `.gitattributes` with `* text=auto` as the only line. This makes line ending conversion mandatory, regardless what `core.autocrlf` there is. Even better, we can add some more specific rules after this "baseline". WHY after? Because according to <http://git-scm.com/docs/gitattributes>:
+
+> When more than one pattern matches the path, a later line overrides an earlier line.
 
 <http://git-scm.com/docs/gitattributes> tells why even `* text=auto` is better than setting `core.autocrlf`, apart from consistency over different global git settings. Basically, `core.autocrlf` only works when checking in and out the files, and `* text=auto` makes sure that existing files in the repository have normalized line-endings as well. For example, given a CRLF file in the repository, setting `* text=auto` would mark that file as modified (probably after clearing the index, see <http://git-scm.com/docs/gitattributes>, "Note: When `text=auto` normalization is enabled in an existing repository, any text files containing CRLFs should be normalized. blabla"), yet with `core.autocrlf=true`, this file in the repository won't be changed (maybe will be changed after another round of check out and check in?). Anyway, using `.gitattributes` seems more consistent, and `core.autocrlf` should be a fallback option.
 
