@@ -117,8 +117,7 @@ This is just advice for building those `conda` programs, where you want location
 
 Put simply, specify `-rpath` with `$ORIGIN` in it, and all needed `-rpathlink` (probably same as `-rpath`) with NO `$ORIGIN` in it.
 
-since `ld` will not expand `$ORIGIN` AT ALL, `rpath-link` should be contain no `$ORIGIN`. Therefore, `rpath` with `$ORIGIN` is not be actually used during linking. To make sure everything works, specify `-rpath` with `$ORIGIN` in it, and specify the same location for `-rpath-link`, but without `$ORIGIN` How to get the current directory, which would be useful for `rpath-link`? Try <http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in?page=1&tab=votes#tab-top>, that is `DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"`
- confirms my understanding.
+since `ld` will not expand `$ORIGIN` AT ALL, `rpath-link` should be contain no `$ORIGIN`. Therefore, `rpath` with `$ORIGIN` is not be actually used during linking. To make sure everything works, specify `-rpath` with `$ORIGIN` in it, and specify the same location for `-rpath-link`, but without `$ORIGIN` How to get the current directory, which would be useful for `rpath-link`? Try <http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in?page=1&tab=votes#tab-top>, that is `DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"`.
 
 ## How to check dependency related stuff.
 
@@ -133,6 +132,10 @@ When specifying linker options such as `-rpath` through `gcc` or `g++`, we need 
 Also, direct dependences are not found by `-rpath`. Instead they should be specified through `-L`.
 
 I think the reason is that maybe only the library loader at runtime (`ld.so` knows `$ORIGIN`), but not `ld` (compiler time linker). See <http://linux.die.net/man/8/ld-linux>, and notice that there's no much relevant mention of `$ORIGIN` in <http://linux.die.net/man/1/ld> (only thing I found is `-z origin`, which seems to add a `FLAGS_1` tag with value `Flags: ORIGIN` when using `readelf -d`).
+
+Why can't we link to some home-installed libc very easily? Because libc is not just `libc.so`. Programs such as `ld.so`, which handles loading of dynamic libraries are also part of it, and all these components must be of the same version. That means to change libc, you have to change many many files, which are very prone to error and not easy to do in a clean way. Check <http://stackoverflow.com/questions/19709932/segfault-from-ld-linux-in-my-build-of-glibc> or <http://unix.stackexchange.com/questions/272606/locally-installing-glibc-2-23-causes-all-programs-to-segfault>, or any article talking about segmentation fault when using some alternative libc.
+
+adding more `-lxxx` in your command line may make the compiling command redundant, but will not affect size of resultant binary. Check <http://stackoverflow.com/questions/370549/size-of-a-library-and-the-executable>. Basically, only useful parts of the library will get linked.
 
 ## Which is preferred when having both
 
